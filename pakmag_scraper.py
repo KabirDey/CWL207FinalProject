@@ -9,6 +9,9 @@ import urllib.parse
 movie_dataset = []
 
 def get_imdb_id(film_name):
+
+    # Official IMDb databse API blocked this script even with headers, so we use hidden autocomplete API
+
     """Searches IMDb using their hidden autocomplete API to bypass scraping blocks."""
     print(f"  -> [IMDb] Searching API for: '{film_name}'...")
     try:
@@ -16,6 +19,8 @@ def get_imdb_id(film_name):
         first_letter = safe_name[0] if safe_name and safe_name[0].isalpha() else 'a'
         url = f"https://v3.sg.media-imdb.com/suggestion/{first_letter}/{safe_name}.json"
         
+        # Sets a custom User-Agent to make scraper identify as a standard web browser, helping bypass basic anti-bot filters that block automated scripts
+
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         }
@@ -112,9 +117,12 @@ def parse_pakmag_page(url, page_id, era):
         if not actor_str: 
             actor_str = extract_data_by_label(soup, "Actors")
 
-        # --- FIX FOR THE INFINITE LOOP ---
+        # FIX FOR THE INFINITE LOOP
+
         # If the page loads but has absolutely no director, actors, or year, 
         # it is likely a dead page masquerading as a real one. Reject it.
+        # This is due to the failsafe not working as an empty page was returned rather than no page
+
         if not year_str and not director_str and not actor_str:
             return None
 
@@ -143,14 +151,12 @@ def parse_pakmag_page(url, page_id, era):
         print(f"Failed to process {url}: {e}")
         return None
 
-# ==========================================
-# MAIN EXECUTION BLOCK WITH SAFETY NET
-# ==========================================
+
 
 try:
-    # ------------------------------------------
+    
     # 1. Scrape Post-Partition Data
-    # ------------------------------------------
+    
     print("Starting Post-Partition Scraping...")
     consecutive_fails = 0
     max_fails = 20  
@@ -174,9 +180,9 @@ try:
         pid += 1
         time.sleep(1.5)
 
-    # ------------------------------------------
+    
     # 2. Scrape Pre-Partition Data
-    # ------------------------------------------
+    
     print("\nStarting Pre-Partition Scraping...")
     consecutive_fails = 0
     pid = 1
@@ -197,18 +203,20 @@ try:
                 break
             
         pid += 1
-        time.sleep(1.5)
+
+         # So that API doesn't detect python script, by sending hundreds of requests per second 
+
+        time.sleep(1.5) 
 
 except KeyboardInterrupt:
-    # This catches the manual stop (Ctrl+C) and prevents data loss
+    # This catches the manual stop (Ctrl+C) and prevents data loss --> in case script needs to be ended prematurely
     print("\n" + "="*50)
     print("🚨 SCRAPING INTERRUPTED BY USER 🚨")
     print("Catching data and preparing to save...")
     print("="*50 + "\n")
 
-# ==========================================
+
 # 3. Export to CSV (Runs normally OR if interrupted)
-# ==========================================
 
 if len(movie_dataset) > 0:
     print(f"\nExporting {len(movie_dataset)} records to CSV...")
