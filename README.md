@@ -1,3 +1,6 @@
+Project by Kabir Dey, Lachlan Knapp, and Samrudh Jakka
+NetID: Kabird3, Lgknapp, Samrudh2
+
 # PakMag & IMDb Film Data Scraper
 
 A robust Python-based automation tool designed to aggregate historical film records from the PakMag database and cross-reference them with unique identifiers from the IMDb autocomplete API.
